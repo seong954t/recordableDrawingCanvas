@@ -7,7 +7,7 @@ const StyledCanvas = styled.canvas`
     border: 1px solid black;
 `;
 
-interface IDrawableCanvas {
+export interface IDrawableCanvas {
     canvasWidth: number;
     canvasHeight: number;
     drawableService: DrawableService;
@@ -17,17 +17,6 @@ interface IDrawableCanvas {
 }
 
 const DrawableCanvas = forwardRef<HTMLCanvasElement, IDrawableCanvas>((props: IDrawableCanvas, ref) => {
-
-    // const canvasRef = useRef<HTMLCanvasElement>(null);
-    // const [drawableService] = useState<DrawableService>(props.drawableService);
-
-    // useEffect(() => {
-    //     const canvasElement = ref.current;
-    //     if(canvasElement === null) {
-    //         return;
-    //     }
-    //     drawableService.init(canvasElement, props.drawable || false);
-    // }, []);
 
     useEffect(() => {
         if(props.strokeStyle) {
@@ -51,8 +40,7 @@ const DrawableCanvas = forwardRef<HTMLCanvasElement, IDrawableCanvas>((props: ID
                       height={props.canvasHeight}
                       onMouseDown={props.drawableService.mouseDownHandler}
                       onMouseUp={props.drawableService.mouseUpHandler}
-                      onMouseMove={props.drawableService.mouseMoveHandler}
-        />
+                      onMouseMove={props.drawableService.mouseMoveHandler}/>
     );
 });
 
