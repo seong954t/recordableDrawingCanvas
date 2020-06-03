@@ -11,6 +11,8 @@ interface IDrawableCanvas {
     canvasWidth: number;
     canvasHeight: number;
     drawable?: boolean;
+    strokeStyle?: string;
+    lineWidth?: number;
 }
 
 const DrawableCanvas: React.FC<IDrawableCanvas> = (props: IDrawableCanvas) => {
@@ -25,6 +27,18 @@ const DrawableCanvas: React.FC<IDrawableCanvas> = (props: IDrawableCanvas) => {
         }
         drawableService.init(canvasElement, props.drawable || false);
     }, []);
+
+    useEffect(() => {
+        if(props.strokeStyle) {
+            drawableService.setStrokeStyle(props.strokeStyle);
+        }
+    }, [props.strokeStyle]);
+
+    useEffect(() => {
+        if(props.lineWidth) {
+            drawableService.setLineWidth(props.lineWidth);
+        }
+    }, [props.lineWidth]);
 
     useEffect(() => {
         drawableService.setIsDrawable(props.drawable || false);

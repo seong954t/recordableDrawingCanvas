@@ -6,6 +6,8 @@ class DrawableService {
     context: CanvasRenderingContext2D;
     drawable: boolean = false;
     isDrawing: boolean = false;
+    strokeStyle: string = "rgb(0, 0, 0)";
+    lineWidth: number = 1;
 
     constructor() {
         this.canvas = document.createElement("canvas");
@@ -32,6 +34,14 @@ class DrawableService {
 
     setIsDrawable = (drawable: boolean) => {
         this.drawable = drawable;
+    };
+
+    setStrokeStyle = (strokeStyle: string) => {
+        this.strokeStyle = strokeStyle;
+    };
+
+    setLineWidth = (lineWidth: number) => {
+        this.lineWidth = lineWidth;
     };
 
     mouseDownHandler = (e: any) => {
@@ -67,7 +77,7 @@ class DrawableService {
 
         const x = Math.floor((pageX - offsetLeft) * canvasRatio);
         const y = Math.floor((pageY - offsetTop) * canvasRatio);
-        return new Action(x, y, actionType);
+        return new Action(x, y, actionType, this.lineWidth, this.strokeStyle);
     };
 
     getCanvasOffset = () => {
