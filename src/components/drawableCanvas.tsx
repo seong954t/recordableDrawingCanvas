@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState, forwardRef} from "react";
 import styled from "styled-components";
 import DrawableService from "../services/drawableService";
 
@@ -10,49 +10,50 @@ const StyledCanvas = styled.canvas`
 interface IDrawableCanvas {
     canvasWidth: number;
     canvasHeight: number;
+    drawableService: DrawableService;
     drawable?: boolean;
     strokeStyle?: string;
     lineWidth?: number;
 }
 
-const DrawableCanvas: React.FC<IDrawableCanvas> = (props: IDrawableCanvas) => {
+const DrawableCanvas = forwardRef<HTMLCanvasElement, IDrawableCanvas>((props: IDrawableCanvas, ref) => {
 
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [drawableService] = useState<DrawableService>(new DrawableService());
+    // const canvasRef = useRef<HTMLCanvasElement>(null);
+    // const [drawableService] = useState<DrawableService>(props.drawableService);
 
-    useEffect(() => {
-        const canvasElement = canvasRef.current;
-        if(canvasElement === null) {
-            return;
-        }
-        drawableService.init(canvasElement, props.drawable || false);
-    }, []);
+    // useEffect(() => {
+    //     const canvasElement = ref.current;
+    //     if(canvasElement === null) {
+    //         return;
+    //     }
+    //     drawableService.init(canvasElement, props.drawable || false);
+    // }, []);
 
     useEffect(() => {
         if(props.strokeStyle) {
-            drawableService.setStrokeStyle(props.strokeStyle);
+            props.drawableService.setStrokeStyle(props.strokeStyle);
         }
     }, [props.strokeStyle]);
 
     useEffect(() => {
         if(props.lineWidth) {
-            drawableService.setLineWidth(props.lineWidth);
+            props.drawableService.setLineWidth(props.lineWidth);
         }
     }, [props.lineWidth]);
 
     useEffect(() => {
-        drawableService.setIsDrawable(props.drawable || false);
+        props.drawableService.setIsDrawable(props.drawable || false);
     }, [props.drawable]);
 
     return (
-        <StyledCanvas ref={canvasRef}
+        <StyledCanvas ref={ref}
                       width={props.canvasWidth}
                       height={props.canvasHeight}
-                      onMouseDown={drawableService.mouseDownHandler}
-                      onMouseUp={drawableService.mouseUpHandler}
-                      onMouseMove={drawableService.mouseMoveHandler}
+                      onMouseDown={props.drawableService.mouseDownHandler}
+                      onMouseUp={props.drawableService.mouseUpHandler}
+                      onMouseMove={props.drawableService.mouseMoveHandler}
         />
     );
-};
+});
 
 export default DrawableCanvas;
