@@ -1,6 +1,6 @@
 import {ActionType} from "../types/actionType";
 
-export default class Action {
+export class Action {
     actionType: ActionType;
     x: number;
     y: number;

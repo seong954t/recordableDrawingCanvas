@@ -1,5 +1,5 @@
 import {ActionType} from "../types/actionType";
-import Action from "../models/action";
+import {Action} from "../models/action";
 
 class DrawableService {
     canvas: HTMLCanvasElement;

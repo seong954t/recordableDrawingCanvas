@@ -1,13 +1,8 @@
-import React, {useEffect, useRef, useState, forwardRef} from "react";
+import React, {useEffect, useRef, useState, forwardRef, ComponentProps} from "react";
 import styled from "styled-components";
 import DrawableService from "../services/drawableService";
 
-const StyledCanvas = styled.canvas`
-    width: 300px;
-    border: 1px solid black;
-`;
-
-export interface IDrawableCanvas {
+export interface IDrawableCanvas extends ComponentProps<any>{
     canvasWidth: number;
     canvasHeight: number;
     drawableService: DrawableService;
@@ -35,12 +30,13 @@ const DrawableCanvas = forwardRef<HTMLCanvasElement, IDrawableCanvas>((props: ID
     }, [props.drawable]);
 
     return (
-        <StyledCanvas ref={ref}
-                      width={props.canvasWidth}
-                      height={props.canvasHeight}
-                      onMouseDown={props.drawableService.mouseDownHandler}
-                      onMouseUp={props.drawableService.mouseUpHandler}
-                      onMouseMove={props.drawableService.mouseMoveHandler}/>
+        <canvas className={props.className}
+                ref={ref}
+                width={props.canvasWidth}
+                height={props.canvasHeight}
+                onMouseDown={props.drawableService.mouseDownHandler}
+                onMouseUp={props.drawableService.mouseUpHandler}
+                onMouseMove={props.drawableService.mouseMoveHandler}/>
     );
 });
 
