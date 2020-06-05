@@ -63,7 +63,7 @@ class RecordableService {
 
     recordingInterval = () => {
         const actionList = this.drawableService.getActionList();
-        if(actionList.length > 0) {
+        if (actionList.length > 0) {
             const nextTimeInterval = (new Date().getTime()) - this.startTime;
             this.actionsIntervalList.push(new ActionsInterval(this.drawableService.getActionList(), nextTimeInterval));
             this.drawableService.clearActionList();
@@ -88,12 +88,12 @@ class RecordableService {
 
     play = () => {
         this.isPlay = true;
-        if(this.playInfo !== null) {
-            if(this.playInfo.playStateType === PlayStateType.MODIFIED) {
+        if (this.playInfo !== null) {
+            if (this.playInfo.playStateType === PlayStateType.MODIFIED) {
                 this.drawingAuto();
                 this.playTime = new Date().getTime() - this.playInfo.timeStamp;
                 this.playInfo = null;
-            } else if(this.playInfo.playStateType === PlayStateType.NORMAL) {
+            } else if (this.playInfo.playStateType === PlayStateType.NORMAL) {
                 this.playTime += this.playInfo.timeStamp;
             }
         } else {
@@ -104,9 +104,9 @@ class RecordableService {
 
     drawingAuto = () => {
         this.drawableService.clearCanvas();
-        for(let i = 0; i < this.actionsIntervalList.length; i++) {
+        for (let i = 0; i < this.actionsIntervalList.length; i++) {
             const actionsInterval = this.actionsIntervalList[i];
-            if( (this.playInfo ? this.playInfo.timeStamp : 0) < actionsInterval.interval) {
+            if ((this.playInfo ? this.playInfo.timeStamp : 0) < actionsInterval.interval) {
                 break;
             }
             this.drawableService.setActionList(actionsInterval.actions);
@@ -117,15 +117,15 @@ class RecordableService {
     };
 
     drawingInterval = () => {
-        if(this.actionsIntervalPlayPosition < this.actionsIntervalList.length) {
+        if (this.actionsIntervalPlayPosition < this.actionsIntervalList.length) {
             const currentActionsInterval = this.actionsIntervalList[this.actionsIntervalPlayPosition];
             let timeSlot = currentActionsInterval.interval - this.prevActionsInterval.interval;
-            if(this.playInfo !== null) {
+            if (this.playInfo !== null) {
                 timeSlot = currentActionsInterval.interval - this.playInfo.timeStamp;
                 this.playInfo = null;
             }
             setTimeout(() => {
-                if(!this.isPlay) {
+                if (!this.isPlay) {
                     return;
                 }
                 this.drawableService.setActionList(currentActionsInterval.actions);
