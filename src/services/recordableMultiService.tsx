@@ -1,14 +1,18 @@
-import {RecordType} from "../types/recordType";
 import {ActionsInterval} from "../models/actionsInterval";
-import {setInterval} from "timers";
 import DrawableService from "./drawableService";
+import {RecordType} from "../types/recordType";
 import {PlayState, PlayStateType} from "../models/playState";
+import {DrawableActionsInterval} from "../models/drawableActionsInterval";
+import {setInterval} from "timers";
+import {MultiActionsInterval} from "../models/multiActionsInterval";
 
-class RecordableService {
-    actionsIntervalList: ActionsInterval[];
+class RecordableMultiService {
+    multiActionsIntervalList: MultiActionsInterval[];
     actionsIntervalPlayPosition: number;
-    drawableService: DrawableService;
+    drawableServiceList: DrawableService[];
+    drawableServiceIndex: number;
     timeInterval: number;
+    drawingTimeInterval: number;
     intervalId: NodeJS.Timeout | null;
     state: RecordType;
     startTime: number;
@@ -18,27 +22,25 @@ class RecordableService {
     playInfo: PlayState | null;
     prevActionsInterval: ActionsInterval;
 
-    constructor(timeInterval = 100) {
-        this.actionsIntervalList = [];
-        this.drawableService = new DrawableService();
+    constructor(drawableService: DrawableService[], timeInterval = 100) {
+        this.multiActionsIntervalList = [];
+        this.actionsIntervalPlayPosition = 0;
+        this.drawableServiceList = drawableService;
+        this.drawableServiceIndex = 0;
         this.timeInterval = timeInterval;
+        this.drawingTimeInterval = 0;
         this.intervalId = null;
         this.state = RecordType.READY;
         this.startTime = 0;
         this.stopTime = 0;
         this.playTime = 0;
-        this.actionsIntervalPlayPosition = 0;
         this.prevActionsInterval = new ActionsInterval([], 0);
         this.playInfo = null;
         this.isPlay = false;
     }
 
-    setDrawableService = (drawableService: DrawableService) => {
-        this.drawableService = drawableService;
-    };
-
     setState = (state: RecordType) => {
-        if(this.state === state) {
+        if (this.state === state) {
             return;
         }
         this.state = state;
@@ -65,11 +67,11 @@ class RecordableService {
     };
 
     recordingInterval = () => {
-        const actionList = this.drawableService.getActionList();
+        const actionList = this.getCurrentDrawableService().getActionList();
         if (actionList.length > 0) {
             const nextTimeInterval = (new Date().getTime()) - this.startTime;
-            this.actionsIntervalList.push(new ActionsInterval(this.drawableService.getActionList(), nextTimeInterval));
-            this.drawableService.clearActionList();
+            this.multiActionsIntervalList.push(new MultiActionsInterval(this.getCurrentDrawableService().getActionList(), nextTimeInterval, this.drawableServiceIndex));
+            this.getCurrentDrawableService().clearActionList();
         }
     };
 
@@ -106,43 +108,53 @@ class RecordableService {
     };
 
     drawingAuto = () => {
-        this.drawableService.clearCanvas();
-        for (let i = 0; i < this.actionsIntervalList.length; i++) {
-            const actionsInterval = this.actionsIntervalList[i];
+        this.getCurrentDrawableService().clearCanvas();
+        this.actionsIntervalPlayPosition = 0;
+        for (let i = 0; i < this.multiActionsIntervalList.length; i++) {
+            const actionsInterval = this.multiActionsIntervalList[i];
             if ((this.playInfo ? this.playInfo.timeStamp : 0) < actionsInterval.interval) {
                 break;
             }
-            this.drawableService.setActionList(actionsInterval.actions);
-            this.drawableService.drawActions();
-            this.actionsIntervalPlayPosition = i;
+
+            const currentActionsInterval = this.multiActionsIntervalList[i];
+
+            const currentDrawableService = this.getDrawableService(currentActionsInterval.actionTarget);
+            currentDrawableService.setActionList(currentActionsInterval.actions);
+            currentDrawableService.drawActions();
+            this.actionsIntervalPlayPosition++;
             this.prevActionsInterval = actionsInterval;
         }
     };
 
     drawingInterval = () => {
-        if (this.actionsIntervalPlayPosition < this.actionsIntervalList.length) {
-            const currentActionsInterval = this.actionsIntervalList[this.actionsIntervalPlayPosition];
+        if (this.actionsIntervalPlayPosition < this.multiActionsIntervalList.length) {
+            const currentActionsInterval = this.multiActionsIntervalList[this.actionsIntervalPlayPosition];
             let timeSlot = currentActionsInterval.interval - this.prevActionsInterval.interval;
             if (this.playInfo !== null) {
                 timeSlot = currentActionsInterval.interval - this.playInfo.timeStamp;
                 this.playInfo = null;
             }
-            setTimeout(() => {
+            //@ts-ignore
+            this.drawingTimeInterval = setTimeout(() => {
                 if (!this.isPlay) {
                     return;
                 }
-                this.drawableService.setActionList(currentActionsInterval.actions);
-                this.drawableService.drawActions();
+                const currentDrawableService = this.getDrawableService(currentActionsInterval.actionTarget);
+                currentDrawableService.setActionList(currentActionsInterval.actions);
+                currentDrawableService.drawActions();
 
                 this.actionsIntervalPlayPosition++;
                 this.prevActionsInterval = currentActionsInterval;
                 this.drawingInterval();
             }, timeSlot);
-        }
+        } 
     };
 
     pause = () => {
         this.setPlayInfo(new PlayState(new Date().getTime() - this.playTime, PlayStateType.NORMAL));
+        console.log(this.drawingTimeInterval);
+        clearTimeout(this.drawingTimeInterval);
+        this.drawingTimeInterval = 0;
         this.isPlay = false;
     };
 
@@ -151,22 +163,44 @@ class RecordableService {
     };
 
     reset = () => {
-        this.drawableService.clearCanvas();
-        this.drawableService.clearActionList();
+        for (const drawableService of this.drawableServiceList) {
+            drawableService.clearCanvas();
+            drawableService.clearActionList();
+        }
         if (this.intervalId !== null) {
             clearInterval(this.intervalId);
         }
-        this.actionsIntervalList = [];
+        this.multiActionsIntervalList = [];
+        this.actionsIntervalPlayPosition = 0;
         this.intervalId = null;
         this.state = RecordType.STOP;
         this.startTime = 0;
         this.stopTime = 0;
         this.playTime = 0;
-        this.actionsIntervalPlayPosition = 0;
         this.prevActionsInterval = new ActionsInterval([], 0);
         this.playInfo = null;
         this.isPlay = false;
-    }
+    };
+
+    getCurrentDrawableService = () => {
+        return this.drawableServiceList[this.drawableServiceIndex];
+    };
+
+    getDrawableService = (index: number) => {
+        return this.drawableServiceList[index];
+    };
+
+    setDrawableServiceIndex = (index: number) => {
+        this.drawableServiceIndex = index;
+    };
+
+    serialize = () => {
+        return JSON.stringify(this.multiActionsIntervalList);
+    };
+
+    deserialize = (data: string) => {
+        this.multiActionsIntervalList = JSON.parse(data);
+    };
 }
 
-export default RecordableService;
+export default RecordableMultiService;

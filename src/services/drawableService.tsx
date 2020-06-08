@@ -97,10 +97,11 @@ class DrawableService {
 
     createAction = (pageX: number, pageY: number, actionType: ActionType) => {
         const {offsetLeft, offsetTop} = this.getCanvasOffset();
+        const {scrollX, scrollY} = window;
         const canvasRatio = this.getCanvasRatio();
 
-        const x = Math.floor((pageX - offsetLeft) * canvasRatio);
-        const y = Math.floor((pageY - offsetTop) * canvasRatio);
+        const x = Math.floor((pageX - offsetLeft - scrollX) * canvasRatio);
+        const y = Math.floor((pageY - offsetTop - scrollY) * canvasRatio);
         const newAction = new Action(x, y, actionType, this.lineWidth, this.strokeStyle);
         this.actionList.push(newAction);
         return newAction;
