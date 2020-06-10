@@ -120,6 +120,7 @@ class DrawableService {
         switch (action.actionType) {
             case ActionType.MOVETO:
                 this.context.beginPath();
+                this.context.lineCap = "round";
                 this.context.moveTo(action.x, action.y);
                 this.context.strokeStyle = action.strokeStyle;
                 this.context.lineWidth = action.lineWidth;

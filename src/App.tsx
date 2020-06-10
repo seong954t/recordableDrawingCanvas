@@ -7,8 +7,8 @@ import SlideTestPage from "./pages/slideTestPage";
 function App() {
   return (
       // <DrawableTestPage/>
-      // <RecordableTestPage/>
-      <SlideTestPage/>
+      <RecordableTestPage/>
+      // <SlideTestPage/>
   );
 }
 
