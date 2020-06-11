@@ -97,9 +97,8 @@ class RecordableMultiService {
             if (this.playInfo.playStateType === PlayStateType.MODIFIED) {
                 this.drawingAuto();
                 this.playTime = new Date().getTime() - this.playInfo.timeStamp;
-                this.playInfo = null;
             } else if (this.playInfo.playStateType === PlayStateType.NORMAL) {
-                this.playTime += this.playInfo.timeStamp;
+                this.playTime = new Date().getTime() + this.playInfo.timeStamp;
             }
         } else {
             this.playTime = new Date().getTime();
@@ -108,7 +107,10 @@ class RecordableMultiService {
     };
 
     drawingAuto = () => {
-        this.getCurrentDrawableService().clearCanvas();
+        for(const drawableService of this.drawableServiceList) {
+            drawableService.clearCanvas();
+            drawableService.resetSnapshot();
+        }
         this.actionsIntervalPlayPosition = 0;
         for (let i = 0; i < this.multiActionsIntervalList.length; i++) {
             const actionsInterval = this.multiActionsIntervalList[i];
@@ -147,12 +149,11 @@ class RecordableMultiService {
                 this.prevActionsInterval = currentActionsInterval;
                 this.drawingInterval();
             }, timeSlot);
-        } 
+        }
     };
 
     pause = () => {
         this.setPlayInfo(new PlayState(new Date().getTime() - this.playTime, PlayStateType.NORMAL));
-        console.log(this.drawingTimeInterval);
         clearTimeout(this.drawingTimeInterval);
         this.drawingTimeInterval = 0;
         this.isPlay = false;
