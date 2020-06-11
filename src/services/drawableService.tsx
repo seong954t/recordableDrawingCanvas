@@ -35,8 +35,9 @@ class DrawableService {
         } else {
             throw "can not find canvas context";
         }
-        this.snapshotImageList.push(this.context.getImageData(0, 0, this.canvas.width, this.canvas.height));
-        this.snapshotPosition++;
+        this.resetSnapshot();
+        // this.snapshotImageList.push(this.context.getImageData(0, 0, this.canvas.width, this.canvas.height));
+        // this.snapshotPosition++;
     };
 
     setIsDrawable = (drawable: boolean) => {
@@ -182,6 +183,13 @@ class DrawableService {
 
     clearCanvas = () => {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    resetSnapshot = () => {
+        this.snapshotImageList = [];
+        this.snapshotPosition = -1;
+        this.snapshotImageList.push(this.context.getImageData(0, 0, this.canvas.width, this.canvas.height));
+        this.snapshotPosition++;
     }
 }
 
